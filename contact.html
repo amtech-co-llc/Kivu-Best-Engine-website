@@ -120,7 +120,7 @@
                         <div class="col-md-4">
                             <div class="bg-light d-flex flex-column justify-content-center p-4">
                                 <h5 class="text-uppercase">Téléphone</h5>
-                                <p class="m-0"><i class="fa fa-envelope-open text-primary me-2"></i>+243 000 000 000</p>
+                                <p class="m-0"><i class="fa fa-phone text-primary me-2"></i>+243 997 781 968</p>
                             </div>
                         </div>
                     </div>
@@ -226,13 +226,14 @@
                 <div class="row">
                     <div class="col-md-6 text-center text-md-start mb-3 mb-md-0" itemscope
                         itemtype="https://schema.org/Organization">
-                        &copy; <a class="border-bottom" href="./" itemprop="name">Kivu Best Engine</a>,
+                        &copy; <a class="border-bottom" href="./" itemprop="name" translate="no">Kivu Best Engine </a>,
                         Tout droit reservé.
                         <br>
                         Propulsé par
                         <a class="border-bottom" href="https://www.amtech-co.com" target="_blank" rel="sponsored"
                             itemprop="url">
-                            <span itemprop="name">Amtech Technology</span> (<span itemprop="alternateName">Amtech-co
+                            <span itemprop="name" translate="no">Amtech Technology</span> (<span
+                                itemprop="alternateName">Amtech-co
                                 LLC</span>)
                         </a>
 
@@ -254,6 +255,125 @@
                 </div>
             </div>
         </div>
+
+        <!-- Custom dropdown -->
+        <select id="custom-language-selector"
+            style="outline: none;border:none;padding:0.3em;display:flex;justify-content:center;margin:auto;">
+            <option value="">Select Language</option>
+            <option value="en" translate="no">English</option>
+            <option value="fr" translate="no">Français</option>
+            <option value="es" translate="no">Español</option>
+        </select><br>
+
+        <!-- Hidden Google Translate container -->
+        <div id="google_translate_element" style="display:none;"></div>
+
+        <script type="text/javascript">
+            // Hide page initially
+            document.documentElement.style.visibility = 'hidden';
+
+            // Initialize Google Translate
+            function googleTranslateElementInit() {
+                new google.translate.TranslateElement({ pageLanguage: 'fr' }, 'google_translate_element');
+            }
+
+            // Save language preference
+            function saveLanguage(lang) {
+                localStorage.setItem('preferredLanguage', lang);
+            }
+
+            // Apply chosen language
+            function translateLanguage(lang) {
+                const select = document.querySelector("select.goog-te-combo");
+                if (select) {
+                    select.value = lang;
+                    select.dispatchEvent(new Event("change"));
+                    saveLanguage(lang);
+                }
+            }
+
+            // Wait for translation to complete
+            function waitForTranslation(lang) {
+                const interval = setInterval(() => {
+                    const select = document.querySelector("select.goog-te-combo");
+                    if (select && select.value === lang) {
+                        clearInterval(interval);
+                        document.documentElement.style.visibility = 'visible'; // Show page
+                    }
+                }, 100);
+            }
+
+            // Custom dropdown event
+            document.getElementById("custom-language-selector").addEventListener("change", function () {
+                const lang = this.value;
+                if (lang) translateLanguage(lang);
+            });
+
+            // Apply saved language on load
+            document.addEventListener("DOMContentLoaded", () => {
+                const savedLang = localStorage.getItem('preferredLanguage');
+                if (savedLang) {
+                    const tryTranslate = () => {
+                        translateLanguage(savedLang);
+                        document.getElementById("custom-language-selector").value = savedLang;
+                        waitForTranslation(savedLang);
+                    };
+
+                    // Retry in case Google Translate combo is not yet loaded
+                    let retries = 0;
+                    const retryInterval = setInterval(() => {
+                        const combo = document.querySelector("select.goog-te-combo");
+                        if (combo || retries > 20) {
+                            clearInterval(retryInterval);
+                            tryTranslate();
+                        }
+                        retries++;
+                    }, 200);
+                } else {
+                    document.documentElement.style.visibility = 'visible';
+                }
+
+                // Observe DOM for Google Translate banners and remove them
+                const observer = new MutationObserver((mutations) => {
+                    mutations.forEach((mutation) => {
+                        mutation.addedNodes.forEach((node) => {
+                            if (node.id === 'goog-gt-tt' || node.className === 'skiptranslate') {
+                                node.style.display = 'none';
+                            }
+                            if (node.tagName === 'IFRAME' && node.src.includes('translate.google.com')) {
+                                node.remove();
+                            }
+                        });
+                    });
+                });
+
+                observer.observe(document.body, { childList: true, subtree: true });
+            });
+
+            // Async load Google Translate script
+            (function () {
+                const gtScript = document.createElement('script');
+                gtScript.src = "//translate.google.com/translate_a/element.js?cb=googleTranslateElementInit";
+                gtScript.async = true;
+                document.head.appendChild(gtScript);
+            })();
+        </script>
+
+        <style>
+            /* Safety CSS to hide leftover elements */
+            .skiptranslate,
+            #goog-gt-tt,
+            iframe.goog-te-banner-frame {
+                display: none !important;
+            }
+
+            body {
+                top: 0px !important;
+            }
+        </style>
+
+
+
     </div>
     <!-- Footer End -->
 
